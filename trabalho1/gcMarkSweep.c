@@ -4,11 +4,19 @@
 #define STACK_MAX 256
 #define INIT_OBJ_NUM_MAX 8
 
+// Para termos algum lixo para coletar, vamos primeiro iniciar "criando" um
+// interpretador para uma nova linguagem, que possui dois tipos: ints e pairs.
+// Um pair pode ser um par de qualquer coisa, dois ints, dois pairs, um int e
+// um pair.
 typedef enum {
     INT,
     PAIR
 } tipoDoObjeto;
 
+
+// Aqui definimos um objeto, que possui um tipo, uma espécie de tag que será
+// marcada na hora de realizar a coleta, um ponteiro para o próximo objeto e
+// uma tagged union, usada para guardar o conteúdo para o tipo int ou pair.
 typedef struct objeto {
     tipoDoObjeto tipo;
     unsigned char marca;
@@ -25,6 +33,10 @@ typedef struct objeto {
     };
 } objeto;
 
+
+// Agora que críamos nosso interpretador para uma linguagem também criada, 
+// vamos criar uma máquina virtual para armazenar a pilha de variáveis que
+// estão sendo usadas no escopo atual. 
 typedef struct {
     objeto *stack[STACK_MAX];
     int stackTam;
@@ -33,6 +45,8 @@ typedef struct {
     int maxObjetos;
 } maqVirtual;
 
+
+// Primeiramente, precisamos inicializar nossa máquina virtual...
 maqVirtual *novaMV() {
     maqVirtual *mv = malloc(sizeof(maqVirtual));
     mv->stackTam = 0;
@@ -42,6 +56,8 @@ maqVirtual *novaMV() {
     return mv;
 }
 
+// E quando inicializada, precisamos de funções para manipular a pilha dentro
+// da nossa máquina virtual...
 void push(maqVirtual *mv, objeto *valor) {
     if(mv->stackTam > STACK_MAX) {
         printf("Stack overflow!\n");
@@ -56,6 +72,8 @@ objeto *pop(maqVirtual *mv) {
     return mv->stack[--mv->stackTam];
 }
 
+// A primeira fase da coleta de lixo é o "marking". Precisamos percorrer todos
+// os objetos e marcá-los...
 void mark(objeto *obj) {
     if(obj->marca) {
         return;
@@ -75,6 +93,8 @@ void markTodos(maqVirtual *mv) {
     }
 }
 
+// A segunda fase é o "sweeping", onde verificamos todos os objetos e deletamos
+// os que não estão marcados...
 void sweep(maqVirtual *mv) {
     objeto **obj = &mv->primeiroObjeto;
     while(*obj) {
@@ -90,6 +110,7 @@ void sweep(maqVirtual *mv) {
     }
 }
 
+// Então, podemos inicializar nosso coletor de lixo.
 void gc(maqVirtual *mv) {
     int numObjetos = mv->numObjetos;
 
@@ -100,6 +121,7 @@ void gc(maqVirtual *mv) {
     printf("Coletado %d objetos, %d restantes.\n", numObjetos - mv->numObjetos, mv->numObjetos);
 }
 
+// Para coletar o lixo, precisamos inicializar também um objeto.
 objeto *novoObjeto(maqVirtual *mv, tipoDoObjeto tipo) {
     if(mv->numObjetos == mv->maxObjetos) {
         gc(mv);
@@ -115,6 +137,7 @@ objeto *novoObjeto(maqVirtual *mv, tipoDoObjeto tipo) {
     return obj;
 }
 
+// Uma função auxiliar para inserir um inteiro...
 void pushInt(maqVirtual *mv, int intValor) {
   objeto *obj = novoObjeto(mv, INT);
   obj->valor = intValor;
@@ -122,6 +145,7 @@ void pushInt(maqVirtual *mv, int intValor) {
   push(mv, obj);
 }
 
+// E outra para inserir um pair.
 objeto *pushPair(maqVirtual *mv) {
   objeto *obj = novoObjeto(mv, PAIR);
   obj->cauda = pop(mv);
@@ -131,6 +155,7 @@ objeto *pushPair(maqVirtual *mv) {
   return obj;
 }
 
+// Por fim, podemos dar um free na máquina virtual
 void freeMV(maqVirtual *mv) {
   mv->stackTam = 0;
   gc(mv);
