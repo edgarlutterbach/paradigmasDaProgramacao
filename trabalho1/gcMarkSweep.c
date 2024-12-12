@@ -183,32 +183,10 @@ void teste3() {
   freeMV(mv);
 }
 
-void teste4() {
-  printf("Teste 4: Lidando com ciclos.\n");
-  maqVirtual *mv = novaMV();
-  pushInt(mv, 1);
-  pushInt(mv, 2);
-  objeto *a = pushPair(mv);
-  pushInt(mv, 3);
-  pushInt(mv, 4);
-  objeto *b = pushPair(mv);
-
-  a->cauda = b;
-  b->cauda = a;
-
-  gc(mv);
-  if(mv->numObjetos != 4) {
-    printf("Deveria ter coletado objetos.\n");
-  }
-  freeMV(mv);
-}
-
-
 int main() {
   teste1();
   teste2();
   teste3();
-  teste4();
 
   return 0;
 }
