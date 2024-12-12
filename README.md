@@ -1,5 +1,4 @@
-# Repositório dedicado a Apropriação dos trabalhos realizados na matéria de Paradigmas da Programação
+# Repositório dedicado a apropriação dos trabalhos realizados na matéria de Paradigmas da Programação
 
-- Aluno: Edgar Lutterbach
-- Matrícula: 123060005
-- Professor: Carlos Bazílio
+### Primeiro trabalho de implementação: Exercício 4 - Algoritmo Mark-sweep (Coleta de Lixo)
+- Alunos: Bernardo Lannes e Edgar Lutterbach
